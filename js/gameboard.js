@@ -1,4 +1,4 @@
-import Ship from "./ship";
+import Ship from "./ship.js";
 
 export default class Gameboard {
   ships = [];
@@ -15,40 +15,36 @@ export default class Gameboard {
       if (this.validVerticalInput(coords, shiplength) === false) {
         return false;
       }
-      this.ships.push(new Ship(shiplength));
-      let ship = this.ships[this.ships.length - 1];
-      this.placeShipVertical(coords, ship, this.ships.length);
+      this.placeShipVertical(coords, shiplength, this.ships.length +1);
     } else {
       if (this.validHorizontalInput(coords, shiplength) === false) {
         return false;
       }
-      this.ships.push(new Ship(shiplength));
-      let ship = this.ships[this.ships.length - 1];
-      this.placeShipHorizontal(coords, ship, this.ships.length);
+      this.placeShipHorizontal(coords, shiplength, this.ships.length + 1);
     }
+    this.ships.push(new Ship(shiplength));
+    let ship = this.ships[this.ships.length - 1];
     return true;
   }
-  //worry ship placement later
-  // isValidPlacement(){}
 
-  placeShipHorizontal(coords, ship, shipid) {
-    for (let i = 0; i < ship.length; i++) {
+  placeShipHorizontal(coords, shiplength, shipid) {
+    for (let i = 0; i < shiplength; i++) {
       this.grid[coords.y][coords.x + i] = shipid;
     }
   }
-  placeShipVertical(coords, ship, shipid) {
-    for (let i = 0; i < ship.length; i++) {
+  placeShipVertical(coords, shiplength, shipid) {
+    for (let i = 0; i < shiplength; i++) {
       this.grid[coords.y + i][coords.x] = shipid;
     }
   }
 
   AllSunk() {
-    this.ships.forEach((x) => {
-      if (x.isSunk() == false) {
-        return false;
-      }
-    });
-    return true;
+   for(let i = 0 ; i < this.ships.length; i++){
+    if (this.ships[i].isSunk() === false){
+      return false;
+    }
+   }
+   return true;
   }
 
   validHorizontalInput(coords, length) {
@@ -79,5 +75,30 @@ export default class Gameboard {
       return false;
     }
     return true;
+  }
+
+  validShotInput(y, x) {
+    if (
+      x >= this.gridSize ||
+      x < 0 ||
+      y >= this.gridSize ||
+      y < 0 || this.grid[y][x] === -1) {
+      return false;
+    }
+    return true;
+  }
+
+  ReceiveAttack(coords){
+    if(!this.validShotInput(coords.y,coords.x)){
+      throw new Error("Invalid Input");
+    }
+    if(this.grid[coords.y][coords.x] === 0){
+      this.grid[coords.y][coords.x] = -1;
+      return 0;
+    }else{
+      this.ships[this.grid[coords.y][coords.x] -1].hit();
+      this.grid[coords.y][coords.x] = -1;
+      return 1;
+    }
   }
 }
