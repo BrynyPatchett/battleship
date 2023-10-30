@@ -9,48 +9,33 @@ let computer2Wins = 0;
 for (let i = 0; i < 100; i++) {
   let coordi = 0;
   let gameboard = new Gameboard(10);
+  let gameboardPC = new Gameboard(10);
 
 let shiplength = 2;
 let coords = { x: 0, y: 0 };
 gameboard.AddShipToGrid(shiplength, coords, 0);
-
-shiplength = 3;
-coords = { x: 6, y: 4 };
-gameboard.AddShipToGrid(shiplength, coords, 1);
-
-shiplength = 3;
-coords = { x: 6, y: 7 };
-gameboard.AddShipToGrid(shiplength, coords, 1);
-
-shiplength = 4;
-coords = { x: 0, y: 3 };
-gameboard.AddShipToGrid(shiplength, coords, 0);
-
-shiplength = 5;
-coords = { x: 0, y: 9 };
-gameboard.AddShipToGrid(shiplength, coords, 0);
-
-let gameboardPC = new Gameboard(10);
-
-shiplength = 2;
-coords = { x: 0, y: 0 };
 gameboardPC.AddShipToGrid(shiplength, coords, 0);
 
 shiplength = 3;
 coords = { x: 6, y: 4 };
+gameboard.AddShipToGrid(shiplength, coords, 1);
 gameboardPC.AddShipToGrid(shiplength, coords, 1);
 
 shiplength = 3;
 coords = { x: 6, y: 7 };
+gameboard.AddShipToGrid(shiplength, coords, 1);
 gameboardPC.AddShipToGrid(shiplength, coords, 1);
 
 shiplength = 4;
 coords = { x: 0, y: 3 };
-gameboardPC.AddShipToGrid(shiplength, coords, 0);
+gameboard.AddShipToGrid(shiplength, coords, 0);
+gameboardPC.AddShipToGrid(shiplength, coords, 1);
 
 shiplength = 5;
 coords = { x: 0, y: 9 };
-gameboardPC.AddShipToGrid(shiplength, coords, 0);
+gameboard.AddShipToGrid(shiplength, coords, 0);
+gameboardPC.AddShipToGrid(shiplength, coords, 1);
+
 
 
 let computer = new Computer("Computer", gameboardPC);
