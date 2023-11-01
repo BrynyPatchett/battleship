@@ -71,31 +71,6 @@ import boardUI from "./board.js";
 let gameboard = new Gameboard(10);
 let gameboardPC = new Gameboard(10);
 
-let shiplength = 2;
-let coords = { x: 0, y: 0 };
-gameboard.AddShipToGrid(shiplength, coords, 0);
-gameboardPC.AddShipToGrid(shiplength, coords, 0);
-
-shiplength = 3;
-coords = { x: 6, y: 4 };
-gameboard.AddShipToGrid(shiplength, coords, 1);
-gameboardPC.AddShipToGrid(shiplength, coords, 1);
-
-shiplength = 3;
-coords = { x: 6, y: 7 };
-gameboard.AddShipToGrid(shiplength, coords, 1);
-gameboardPC.AddShipToGrid(shiplength, coords, 1);
-
-shiplength = 4;
-coords = { x: 0, y: 3 };
-gameboard.AddShipToGrid(shiplength, coords, 1);
-gameboardPC.AddShipToGrid(shiplength, coords, 1);
-
-shiplength = 5;
-coords = { x: 0, y: 9 };
-gameboard.AddShipToGrid(shiplength, coords, 0);
-gameboardPC.AddShipToGrid(shiplength, coords, 0);
-
 
 const gameInterface = document.querySelector(".game");
 let playerLeftBoard = new boardUI();
@@ -122,6 +97,9 @@ let playerRightTiles = playerRightBoard.querySelector('.tiles');
 
 let computer = new Computer("Computer", gameboardPC);
 let computer2 = new Computer("Computer2", gameboard);
+//place random ships on computer grid
+computer.placeRandomShipsOnBoard();
+computer2.placeRandomShipsOnBoard();
 
 //simulate game
 
