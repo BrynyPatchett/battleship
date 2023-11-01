@@ -10,7 +10,7 @@ export default class Computer extends Player {
     let x = this.getRandomInt(this.gameBoard.grid.length);
     let y = this.getRandomInt(this.gameBoard.grid.length);
     let coords = this.getValidShot(x,y);
-     this.MakeMove(coords);
+     return {status:this.MakeMove(coords),coords};
   }
 
   getRandomInt(max) {
