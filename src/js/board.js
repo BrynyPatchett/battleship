@@ -1,6 +1,12 @@
-export default function CreateGameBoard(){
+export function CreateGameBoard(){
     let gameBoard = document.createElement('div');
     gameBoard.classList.add('board');
+
+    let namePlace = document.createElement('div');
+    namePlace.classList.add('name');
+    namePlace.textContent = "Player";
+
+    gameBoard.appendChild(namePlace);
 
     let tiles = document.createElement('div');
     tiles.classList.add('tiles');
@@ -20,4 +26,8 @@ export default function CreateGameBoard(){
     gameBoard.appendChild(tiles);
     return gameBoard;
 
+}
+
+export function updateBoardName(board,name){
+    board.querySelector(".name").textContent = name;
 }
