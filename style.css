@@ -90,7 +90,11 @@ body{
 }
 
 .occupied{
-    background-color: rgb(227, 240, 192);
+    background-color: rgb(168, 170, 162);
+}
+
+.hit{
+    background-color: lightcoral;
 }
 
 
