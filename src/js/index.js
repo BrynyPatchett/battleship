@@ -2,6 +2,7 @@ import Gameboard from "./gameboard.js";
 import Player from "./player.js";
 import Computer from "./computer.js";
 import { CreateGameBoard, updateBoardName } from "./board.js";
+import Game from './game'
 let currentDirection;
 let currentLocations = [];
 let ships = [5, 4, 3, 3, 2];
@@ -170,41 +171,56 @@ function startPvEgame(tiles) {
 
   console.log(computer);
 
+  let game = new Game(player,computer);
+
   [...playerLeftTiles.children].forEach((element) => {
     element.addEventListener("click", () => {
-      console.log(player.gameBoard.AllSunk())
-      console.log(computer.gameBoard.AllSunk())
-      if (
-        player.gameBoard.AllSunk() !== true &&
-        computer.gameBoard.AllSunk() !== true
-      ) {
+
+        //make Player Move
         let coords = { x: +element.dataset.col, y: +element.dataset.row };
-        let move = player.MakeMove(coords);
-        if (move === 1) {
+        let move = game.MakeMove(coords);
+        if(move === 2){
+          console.log(game.currentPlayer.playerName + "Wins");
+           displayEndScreen(player.playerName);
+           return;
+        }
+        else if (move === 1) {
           element.classList.add("hit");
         } else if(move === 0) {
           element.classList.add("miss");
         }
         else{
           console.log("Bad Move");
+          return;
+        }
+
+        //make AI move
+        let pcMoveCoords = computer.GenerateRandomMove();
+        move = game.MakeMove(pcMoveCoords);
+        let shotTile = playerRightTiles.querySelector(`[data-row="${pcMoveCoords.y}"][data-col="${pcMoveCoords.x}"]`)
+        console.log("AI Move: " + move )
+        if(move === 2){
+          console.log(game.currentPlayer.playerName + "Wins");
+           displayEndScreen(computer.playerName);
+           return;
+        }
+        else if (move === 1) {
+          shotTile.classList.add("hit");
+        } else if(move === 0) {
+          shotTile.classList.add("miss");
+        }
+        else{
+          console.log("Bad Move");
           return
         }
-        if (player.gameBoard.AllSunk()) {
-          console.log(player.playerName + "Wins");
-        }
-        let pcMove = computer.MakeRandomMove();
-        let shotTile = playerRightTiles.querySelector(`[data-row="${pcMove.coords.y}"][data-col="${pcMove.coords.x}"]`)
-        if (pcMove.status === 1){
-              shotTile.classList.add("hit");
-            }else{
-              shotTile.classList.add("miss");
-            }
-            if (computer.gameBoard.AllSunk()) {
-               console.log(computer.playerName +  "Wins");
-            }
 
       }
-    });
+    );
   });
 
+}
+
+
+function displayEndScreen(player){
+  modal.style.display = "flex";
 }

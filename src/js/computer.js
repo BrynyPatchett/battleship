@@ -13,6 +13,13 @@ export default class Computer extends Player {
      return {status:this.MakeMove(coords),coords};
   }
 
+  GenerateRandomMove() {
+    let x = this.getRandomInt(this.gameBoard.grid.length);
+    let y = this.getRandomInt(this.gameBoard.grid.length);
+    return this.getValidShot(x,y);
+    //  return {status:this.MakeMove(coords),coords};
+  }
+
   getRandomInt(max) {
     return Math.floor(Math.random() * max);
   }
