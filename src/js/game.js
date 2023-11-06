@@ -20,7 +20,7 @@ export default class Game {
         this.switchPlayerTurn();
         return moveResult;
       }
-      
+      //game Over
       moveResult = 2;
     } else if (move === 0) {
       moveResult = 0;
@@ -35,6 +35,5 @@ export default class Game {
   switchPlayerTurn() {
     this.currentPlayerIndex = (++this.currentPlayerIndex) % 2;
     this.currentPlayer = this.players[this.currentPlayerIndex];
-    console.log(this.currentPlayer.playerName + "TURN");
   }
 }

@@ -1,17 +1,18 @@
 import Gameboard from "./gameboard.js";
 import Player from "./player.js";
 import Computer from "./computer.js";
-import { CreateGameBoard, updateBoardName } from "./board.js";
-import Game from './game'
+import { CreateGameBoard, updateBoardName } from "./boardUI.js";
+import Game from "./game";
+import { selectGameModal, playerWinModal } from "./modals";
+
 let currentDirection;
 let currentLocations = [];
 let ships = [5, 4, 3, 3, 2];
 let selectedShipIndex = 0;
-let currentPlayer = 0;
-
 
 const modal = document.querySelector(".modal");
-const modalContent = document.querySelector(".modal-content");
+let modalContent = selectGameModal();
+modal.appendChild(modalContent);
 
 let gameboardRight = new Gameboard(10);
 let gameboardLeft = new Gameboard(10);
@@ -25,11 +26,16 @@ gameInterface.appendChild(playerRightBoard);
 let playerLeftTiles = playerLeftBoard.querySelector(".tiles");
 let playerRightTiles = playerRightBoard.querySelector(".tiles");
 
-let selectedPvE = document.querySelector("#PvE");
-let selectedPvP = document.querySelector("#PvP");
+let selectedPvE = modalContent.querySelector("#PvE");
+let selectedPvP = modalContent.querySelector("#PvP");
+selectedPvE.addEventListener("click", initPvEGame);
+selectedPvP.addEventListener("click", initPvPGame);
 
-selectedPvE.addEventListener("click", () => {
-  console.log("selected Player Versus Computer");
+
+
+
+
+function initPvEGame() {
   modal.style.display = "none";
   updateBoardName(playerLeftBoard, "Computer");
   updateBoardName(playerRightBoard, "You");
@@ -38,16 +44,16 @@ selectedPvE.addEventListener("click", () => {
   currentDirection = 0;
   //add hover selection UI to boatin
   initaliseGame(playerRightTiles, gameboardRight, 0);
-});
+}
 
-selectedPvP.addEventListener("click", () => {
-  console.log("selected Player Versus Player");
-  console.log("Display player names");
-  modal.style.display = "none";
-  currentDirection = 0;
-  removeHoverFromTiles(playerLeftTiles);
-  addHoverPlacementToBoard(playerRightTiles, 1);
-});
+function initPvPGame() {
+  // console.log("selected Player Versus Player");
+  // console.log("Display player names");
+  // modal.style.display = "none";
+  // currentDirection = 0;
+  // removeHoverFromTiles(playerLeftTiles);
+  // addHoverPlacementToBoard(playerRightTiles, 1);
+}
 
 function removeHoverFromTiles(tiles) {
   [...tiles.children].forEach((element) => {
@@ -60,16 +66,14 @@ function addHoverToTiles(tiles) {
     element.classList.remove("disabled");
   });
 }
-let test;
 
 function initaliseGame(tiles, gameBoard, isPvP) {
+document.addEventListener("keydown",rotateShip);
+
   [...tiles.children].forEach((element) => {
-    element.addEventListener(
-      "mouseover",
-      (test = function () {
-        hoverPlacementPreview(element, tiles);
-      })
-    );
+    element.addEventListener("mouseover", () => {
+      hoverPlacementPreview(element, tiles);
+    });
     element.addEventListener("click", () => {
       let coords = { x: +element.dataset.col, y: +element.dataset.row };
       if (
@@ -84,9 +88,6 @@ function initaliseGame(tiles, gameBoard, isPvP) {
         });
         selectedShipIndex++;
         if (selectedShipIndex === ships.length) {
-          console.log("removing click from" + element);
-          //replacing elements removes all listeners
-
           isPvP
             ? console.log(
                 "PvP Move onto next player, show blank screen,tear down events and add to other grid"
@@ -100,8 +101,10 @@ function initaliseGame(tiles, gameBoard, isPvP) {
 
 function hoverPlacementPreview(element, tiles) {
   //remove hover placement from last location
+  
+
   removeHoverPlacementToBoard();
-  currentLocations = [];
+  // currentLocations = [];
   let coords = { x: +element.dataset.col, y: +element.dataset.row };
   if (currentDirection === 0) {
     currentLocations = getHorizontalPlacementTiles(coords, tiles);
@@ -121,6 +124,8 @@ function hoverPlacementPreview(element, tiles) {
 }
 
 function removeHoverPlacementToBoard() {
+
+  if(currentLocations !== undefined)
   currentLocations.forEach((element) => {
     element.classList.remove("hit");
     element.classList.remove("valid");
@@ -136,7 +141,6 @@ function getHorizontalPlacementTiles(coords, tiles) {
       locations.push(tile);
     }
   }
-  console.log(locations);
   return locations;
 }
 function getVericalPlacementTiles(coords, tiles) {
@@ -161,66 +165,98 @@ function startPvEgame(tiles) {
   addHoverToTiles(playerLeftTiles);
   //simulate Game
 
-
   let computer = new Computer("Computer", gameboardLeft);
   computer.placeRandomShipsOnBoard();
-  console.log(computer.gameBoard);
-  let player = new Player("Player", computer.gameBoard);
-  console.log(player);
+  let player = new Player("You", computer.gameBoard);
   computer = new Computer("Computer", gameboardRight);
 
-  console.log(computer);
-
-  let game = new Game(player,computer);
+  let game = new Game(player, computer);
 
   [...playerLeftTiles.children].forEach((element) => {
     element.addEventListener("click", () => {
-
-        //make Player Move
-        let coords = { x: +element.dataset.col, y: +element.dataset.row };
-        let move = game.MakeMove(coords);
-        if(move === 2){
-          console.log(game.currentPlayer.playerName + "Wins");
-           displayEndScreen(player.playerName);
-           return;
-        }
-        else if (move === 1) {
-          element.classList.add("hit");
-        } else if(move === 0) {
-          element.classList.add("miss");
-        }
-        else{
-          console.log("Bad Move");
-          return;
-        }
-
-        //make AI move
-        let pcMoveCoords = computer.GenerateRandomMove();
-        move = game.MakeMove(pcMoveCoords);
-        let shotTile = playerRightTiles.querySelector(`[data-row="${pcMoveCoords.y}"][data-col="${pcMoveCoords.x}"]`)
-        console.log("AI Move: " + move )
-        if(move === 2){
-          console.log(game.currentPlayer.playerName + "Wins");
-           displayEndScreen(computer.playerName);
-           return;
-        }
-        else if (move === 1) {
-          shotTile.classList.add("hit");
-        } else if(move === 0) {
-          shotTile.classList.add("miss");
-        }
-        else{
-          console.log("Bad Move");
-          return
-        }
-
+      //make Player Move
+      let coords = { x: +element.dataset.col, y: +element.dataset.row };
+      let move = game.MakeMove(coords);
+      if (move === 2) {
+        element.classList.add("hit");
+        displayEndScreen(player.playerName);
+        return;
+      } else if (move === 1) {
+        element.classList.add("hit");
+      } else if (move === 0) {
+        element.classList.add("miss");
+      } else {
+        return;
       }
-    );
+      //make AI move
+      let pcMoveCoords = computer.GenerateRandomMove();
+      move = game.MakeMove(pcMoveCoords);
+      let shotTile = playerRightTiles.querySelector(
+        `[data-row="${pcMoveCoords.y}"][data-col="${pcMoveCoords.x}"]`
+      );
+      if (move === 2) {
+        shotTile.classList.add("hit");
+        displayEndScreen(computer.playerName);
+        return;
+      } else if (move === 1) {
+        shotTile.classList.add("hit");
+      } else if (move === 0) {
+        shotTile.classList.add("miss");
+      } else {
+        return;
+      }
+    });
   });
-
 }
 
-
-function displayEndScreen(player){
+function displayEndScreen(player) {
+  modal.removeChild(modal.firstChild);
+  let winnerDiv = playerWinModal(player);
+  modal.appendChild(winnerDiv);
   modal.style.display = "flex";
+  winnerDiv.querySelector("#newgame");
+  winnerDiv.addEventListener("click", resetGame);
 }
+
+function resetGame() {
+  playerLeftBoard = CreateGameBoard();
+  playerRightBoard = CreateGameBoard();
+ 
+ 
+  gameInterface.firstElementChild.remove();
+  gameInterface.lastElementChild.remove();
+ 
+ 
+   gameInterface.insertBefore(playerLeftBoard, gameInterface.firstChild);
+   gameInterface.appendChild(playerRightBoard);
+   playerLeftTiles = playerLeftBoard.querySelector(".tiles");
+   playerRightTiles = playerRightBoard.querySelector(".tiles");
+ 
+   modal.firstElementChild.remove();
+   modal.appendChild(modalContent);
+ 
+   gameboardRight = new Gameboard(10);
+   gameboardLeft = new Gameboard(10);
+ 
+   selectedShipIndex = 0;
+ 
+
+}
+
+
+function rotateShip(e){
+  console.log(e.code === "Space");
+  if(currentDirection === 0){
+    currentDirection = 1;
+  }
+  else{
+    currentDirection = 0;
+  }
+  if(currentLocations.length > 0){
+    
+    let currentLocation = currentLocations[0];
+    hoverPlacementPreview(currentLocation,playerRightTiles);
+  }
+}
+
+
