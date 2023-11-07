@@ -3,7 +3,7 @@ import Player from "./player.js";
 import Computer from "./computer.js";
 import { CreateGameBoard, updateBoardName } from "./boardUI.js";
 import Game from "./game";
-import { selectGameModal, playerWinModal } from "./modals";
+import { selectGameModal, playerWinModal,namesModal } from "./modals";
 
 let currentDirection;
 let currentLocations = [];
@@ -14,12 +14,20 @@ let currentTiles;
 let enemyTiles;
 let game;
 let inputDisabled = false;
+let playerNames = ["Player One","Player Two"]
 
 const modal = document.querySelector(".modal");
 let modalContent = selectGameModal();
 modal.appendChild(modalContent);
 
 const turnButton = document.querySelector("#next-turn");
+
+const controlMessage = document.querySelector(".control-message");
+
+const nameinput = namesModal();
+
+
+
 
 turnButton.addEventListener('click',()=>{
  turnButton.style.display = "none";
@@ -43,12 +51,39 @@ let playerRightTiles = playerRightBoard.querySelector(".tiles");
 let selectedPvE = modalContent.querySelector("#PvE");
 let selectedPvP = modalContent.querySelector("#PvP");
 selectedPvE.addEventListener("click", initPvEGame);
-selectedPvP.addEventListener("click", initPvPGame);
+// selectedPvP.addEventListener("click", initPvPGame);
+selectedPvP.addEventListener("click", displayNameModal);
+
+function displayNameModal(){
+  modalContent.style.display = "none";
+  let namesSelector = namesModal();
+  modal.appendChild(namesSelector);
+ let playerOneName = namesSelector.querySelector("#playeroneinput")
+  let playerTwoName = namesSelector.querySelector("#playertwoinput")
+
+  namesSelector.querySelector("#playgame").addEventListener("click",()=>{
+    let p1Name = playerOneName.value;
+    let p2Name = playerTwoName.value;
+    if(!/\S/.test(p1Name)){
+      p1Name = "Player One"
+    }
+    if(!/\S/.test(p2Name)){
+      p2Name = "Player Two"
+    }
+    playerNames = [p1Name,p2Name];
+    modal.removeChild(modal.lastElementChild);
+    modalContent.style.display = "flex";
+    initPvPGame();
+  });
+  
+}
+
 
 function initPvEGame() {
   modal.style.display = "none";
-  updateBoardName(playerLeftBoard, "Computer");
+
   updateBoardName(playerRightBoard, "You");
+  updateBoardName(playerLeftBoard, "Computer");
   removeHoverFromTiles(playerLeftTiles);
   //list of ships, add click event, then remove after each one placed
   currentDirection = 0;
@@ -57,10 +92,11 @@ function initPvEGame() {
 }
 
 function initPvPGame() {
-  console.log("selected Player Versus Player");
-  console.log("Display player names");
+  updateBoardName(playerRightBoard, playerNames[0]);
+  updateBoardName(playerLeftBoard, playerNames[1]);
   modal.style.display = "none";
   currentDirection = 0;
+  currentPlayer =0;
   removeHoverFromTiles(playerLeftTiles);
   currentTiles = playerRightTiles;
   initaliseGame(playerRightTiles, gameboardRight, 1);
@@ -80,7 +116,8 @@ function addHoverToTiles(tiles) {
 
 function initaliseGame(tiles, gameBoard, isPvP) {
   document.addEventListener("keydown", rotateShip);
-  currentTiles = tiles;
+  controlMessage.style.display = "flex";
+  controlMessage.textContent = playerNames[currentPlayer] + " Click to place ship. Press 'space' to rotate.";
 
   [...tiles.children].forEach((element) => {
     element.addEventListener("mouseover", () => {
@@ -115,10 +152,12 @@ function initaliseGame(tiles, gameBoard, isPvP) {
               selectedShipIndex = 0;
               hideOccupied(playerRightTiles);
               resetBoard(tiles);
+              currentPlayer = 1;
               initaliseGame(playerLeftTiles, gameboardLeft, 2);
             } else {
-              showOccupied(playerRightTiles);
+              // showOccupied(playerRightTiles);
               console.log("startPvPgame(tiles)");
+              // currentPlayer = 0;
               startPvPgame();
             }
           } else {
@@ -185,17 +224,22 @@ function getVericalPlacementTiles(coords, tiles) {
 }
 
 function startPvPgame() {
+  controlMessage.style.display = "none";
   //get rid of placement event listeners
   resetBoard(playerRightTiles);
   resetBoard(playerLeftTiles);
   //add hover to tiles of first playerr
   removeHoverFromTiles(playerRightTiles);
-  addHoverToTiles(playerLeftTiles);
-  let playerOne = new Player("Player One", gameboardLeft);
-  let playerTwo = new Player("Player Two", gameboardRight);
+   addHoverToTiles(playerLeftTiles);
+  let playerOne = new Player(playerNames[0], gameboardLeft);
+  let playerTwo = new Player(playerNames[1], gameboardRight);
   currentPlayer = 0;
    game = new Game(playerOne, playerTwo);
-  hideOccupied(playerLeftTiles);
+   enemyTiles = playerRightTiles;
+      currentTiles = playerLeftTiles;
+   switchDisplay(enemyTiles, currentTiles);
+    hideOccupied(playerLeftTiles);
+    
 
   [...playerLeftTiles.children].forEach((element) => {
     element.addEventListener("click", () => {
@@ -218,6 +262,7 @@ function startPvPgame() {
 }
 
 function startPvEgame(tiles) {
+  controlMessage.style.display = "none";
   resetBoard(tiles);
   removeHoverFromTiles(playerRightTiles);
   addHoverToTiles(playerLeftTiles);
@@ -277,12 +322,12 @@ function PvPTurn(element, playerId, player) {
       return;
     } else if (move === 1) {
       element.classList.add("hit");
-      switchDisplay(currentTiles, enemyTiles);
       currentPlayer = ++currentPlayer % 2;
+      switchDisplay(currentTiles, enemyTiles);
     } else if (move === 0) {
       element.classList.add("miss");
-      switchDisplay(currentTiles, enemyTiles);
       currentPlayer = ++currentPlayer % 2;
+      switchDisplay(currentTiles, enemyTiles);
     }
   }
   return;
@@ -290,10 +335,11 @@ function PvPTurn(element, playerId, player) {
 
 function switchDisplay(currentTiles, enemyTiles) {
    inputDisabled = true;
-  hideOccupied(currentTiles);
+   hideOccupied(currentTiles);
    removeHoverFromTiles(enemyTiles);
-  removeHoverFromTiles(currentTiles);
+   removeHoverFromTiles(currentTiles);
    turnButton.style.display = "inline";
+   turnButton.textContent = playerNames[currentPlayer] + "'s turn";
 }
 
 function displayEndScreen(player) {
