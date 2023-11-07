@@ -9,10 +9,24 @@ let currentDirection;
 let currentLocations = [];
 let ships = [5, 4, 3, 3, 2];
 let selectedShipIndex = 0;
+let currentPlayer = 0;
+let currentTiles;
+let enemyTiles;
+let game;
+let inputDisabled = false;
 
 const modal = document.querySelector(".modal");
 let modalContent = selectGameModal();
 modal.appendChild(modalContent);
+
+const turnButton = document.querySelector("#next-turn");
+
+turnButton.addEventListener('click',()=>{
+ turnButton.style.display = "none";
+  inputDisabled = false;
+ showOccupied(enemyTiles);
+   addHoverToTiles(currentTiles);
+})
 
 let gameboardRight = new Gameboard(10);
 let gameboardLeft = new Gameboard(10);
@@ -31,10 +45,6 @@ let selectedPvP = modalContent.querySelector("#PvP");
 selectedPvE.addEventListener("click", initPvEGame);
 selectedPvP.addEventListener("click", initPvPGame);
 
-
-
-
-
 function initPvEGame() {
   modal.style.display = "none";
   updateBoardName(playerLeftBoard, "Computer");
@@ -47,12 +57,13 @@ function initPvEGame() {
 }
 
 function initPvPGame() {
-  // console.log("selected Player Versus Player");
-  // console.log("Display player names");
-  // modal.style.display = "none";
-  // currentDirection = 0;
-  // removeHoverFromTiles(playerLeftTiles);
-  // addHoverPlacementToBoard(playerRightTiles, 1);
+  console.log("selected Player Versus Player");
+  console.log("Display player names");
+  modal.style.display = "none";
+  currentDirection = 0;
+  removeHoverFromTiles(playerLeftTiles);
+  currentTiles = playerRightTiles;
+  initaliseGame(playerRightTiles, gameboardRight, 1);
 }
 
 function removeHoverFromTiles(tiles) {
@@ -68,7 +79,8 @@ function addHoverToTiles(tiles) {
 }
 
 function initaliseGame(tiles, gameBoard, isPvP) {
-document.addEventListener("keydown",rotateShip);
+  document.addEventListener("keydown", rotateShip);
+  currentTiles = tiles;
 
   [...tiles.children].forEach((element) => {
     element.addEventListener("mouseover", () => {
@@ -88,11 +100,30 @@ document.addEventListener("keydown",rotateShip);
         });
         selectedShipIndex++;
         if (selectedShipIndex === ships.length) {
-          isPvP
-            ? console.log(
-                "PvP Move onto next player, show blank screen,tear down events and add to other grid"
-              )
-            : startPvEgame(tiles);
+          document.removeEventListener("keydown", rotateShip);
+          element.onclick = null;
+          element.onmouseover = null;
+          if (isPvP > 0) {
+              removeHoverPlacementToBoard(tiles)
+            //if PvP = 1, first player setup complete setup second player, else ,play PvP game
+            if (isPvP === 1) {
+              currentLocations = [];
+              removeHoverFromTiles(playerRightTiles);
+              //list of ships, add click event, then remove after each one placed
+              currentDirection = 0;
+              //add hover selection UI to boatin
+              selectedShipIndex = 0;
+              hideOccupied(playerRightTiles);
+              resetBoard(tiles);
+              initaliseGame(playerLeftTiles, gameboardLeft, 2);
+            } else {
+              showOccupied(playerRightTiles);
+              console.log("startPvPgame(tiles)");
+              startPvPgame();
+            }
+          } else {
+            startPvEgame(tiles);
+          }
         }
       }
     });
@@ -101,10 +132,8 @@ document.addEventListener("keydown",rotateShip);
 
 function hoverPlacementPreview(element, tiles) {
   //remove hover placement from last location
-  
 
   removeHoverPlacementToBoard();
-  // currentLocations = [];
   let coords = { x: +element.dataset.col, y: +element.dataset.row };
   if (currentDirection === 0) {
     currentLocations = getHorizontalPlacementTiles(coords, tiles);
@@ -124,12 +153,11 @@ function hoverPlacementPreview(element, tiles) {
 }
 
 function removeHoverPlacementToBoard() {
-
-  if(currentLocations !== undefined)
-  currentLocations.forEach((element) => {
-    element.classList.remove("hit");
-    element.classList.remove("valid");
-  });
+  if (currentLocations !== undefined)
+    currentLocations.forEach((element) => {
+      element.classList.remove("hit");
+      element.classList.remove("valid");
+    });
 }
 
 function getHorizontalPlacementTiles(coords, tiles) {
@@ -156,21 +184,52 @@ function getVericalPlacementTiles(coords, tiles) {
   return locations;
 }
 
-function startPvEgame(tiles) {
-  [...tiles.children].forEach((x) => {
-    let clone = x.cloneNode(true);
-    x.parentNode.replaceChild(clone, x);
+function startPvPgame() {
+  //get rid of placement event listeners
+  resetBoard(playerRightTiles);
+  resetBoard(playerLeftTiles);
+  //add hover to tiles of first playerr
+  removeHoverFromTiles(playerRightTiles);
+  addHoverToTiles(playerLeftTiles);
+  let playerOne = new Player("Player One", gameboardLeft);
+  let playerTwo = new Player("Player Two", gameboardRight);
+  currentPlayer = 0;
+   game = new Game(playerOne, playerTwo);
+  hideOccupied(playerLeftTiles);
+
+  [...playerLeftTiles.children].forEach((element) => {
+    element.addEventListener("click", () => {
+      enemyTiles = playerLeftTiles;
+      currentTiles = playerRightTiles;
+      PvPTurn(element, 0, playerOne,playerRightTiles,playerLeftTiles);
+
+    });
   });
+
+  [...playerRightTiles.children].forEach((element) => {
+    element.addEventListener("click", () => {
+      enemyTiles = playerRightTiles;
+      currentTiles = playerLeftTiles;
+      PvPTurn(element, 1, playerTwo,playerLeftTiles,playerRightTiles);
+
+    });
+  });
+  
+}
+
+function startPvEgame(tiles) {
+  resetBoard(tiles);
   removeHoverFromTiles(playerRightTiles);
   addHoverToTiles(playerLeftTiles);
   //simulate Game
 
   let computer = new Computer("Computer", gameboardLeft);
+  //generate sips on the blank board for the player to use
   computer.placeRandomShipsOnBoard();
   let player = new Player("You", computer.gameBoard);
   computer = new Computer("Computer", gameboardRight);
 
-  let game = new Game(player, computer);
+   game = new Game(player, computer);
 
   [...playerLeftTiles.children].forEach((element) => {
     element.addEventListener("click", () => {
@@ -202,11 +261,39 @@ function startPvEgame(tiles) {
         shotTile.classList.add("hit");
       } else if (move === 0) {
         shotTile.classList.add("miss");
-      } else {
-        return;
       }
     });
   });
+}
+
+function PvPTurn(element, playerId, player) {
+
+  if (currentPlayer === playerId && !inputDisabled) {
+    let coords = { x: +element.dataset.col, y: +element.dataset.row };
+    let move = game.MakeMove(coords);
+    if (move === 2) {
+      element.classList.add("hit");
+      displayEndScreen(player.playerName);
+      return;
+    } else if (move === 1) {
+      element.classList.add("hit");
+      switchDisplay(currentTiles, enemyTiles);
+      currentPlayer = ++currentPlayer % 2;
+    } else if (move === 0) {
+      element.classList.add("miss");
+      switchDisplay(currentTiles, enemyTiles);
+      currentPlayer = ++currentPlayer % 2;
+    }
+  }
+  return;
+}
+
+function switchDisplay(currentTiles, enemyTiles) {
+   inputDisabled = true;
+  hideOccupied(currentTiles);
+   removeHoverFromTiles(enemyTiles);
+  removeHoverFromTiles(currentTiles);
+   turnButton.style.display = "inline";
 }
 
 function displayEndScreen(player) {
@@ -221,42 +308,55 @@ function displayEndScreen(player) {
 function resetGame() {
   playerLeftBoard = CreateGameBoard();
   playerRightBoard = CreateGameBoard();
- 
- 
+
   gameInterface.firstElementChild.remove();
   gameInterface.lastElementChild.remove();
- 
- 
-   gameInterface.insertBefore(playerLeftBoard, gameInterface.firstChild);
-   gameInterface.appendChild(playerRightBoard);
-   playerLeftTiles = playerLeftBoard.querySelector(".tiles");
-   playerRightTiles = playerRightBoard.querySelector(".tiles");
- 
-   modal.firstElementChild.remove();
-   modal.appendChild(modalContent);
- 
-   gameboardRight = new Gameboard(10);
-   gameboardLeft = new Gameboard(10);
- 
-   selectedShipIndex = 0;
- 
 
+  gameInterface.insertBefore(playerLeftBoard, gameInterface.firstChild);
+  gameInterface.appendChild(playerRightBoard);
+  playerLeftTiles = playerLeftBoard.querySelector(".tiles");
+  playerRightTiles = playerRightBoard.querySelector(".tiles");
+
+  modal.firstElementChild.remove();
+  modal.appendChild(modalContent);
+
+  gameboardRight = new Gameboard(10);
+  gameboardLeft = new Gameboard(10);
+
+  selectedShipIndex = 0;
 }
 
-
-function rotateShip(e){
+function rotateShip(e) {
   console.log(e.code === "Space");
-  if(currentDirection === 0){
+  if (currentDirection === 0) {
     currentDirection = 1;
-  }
-  else{
+  } else {
     currentDirection = 0;
   }
-  if(currentLocations.length > 0){
-    
+  if (currentLocations.length > 0) {
     let currentLocation = currentLocations[0];
-    hoverPlacementPreview(currentLocation,playerRightTiles);
+    hoverPlacementPreview(currentLocation, currentTiles);
   }
 }
 
+function resetBoard(tiles) {
+  [...tiles.children].forEach((x) => {
+    let clone = x.cloneNode(true);
+    x.parentNode.replaceChild(clone, x);
+  });
+}
 
+
+function hideOccupied(tiles) {
+  tiles.querySelectorAll(".occupied").forEach((element) => {
+    element.classList.remove("occupied");
+    element.classList.add("occupied-hidden");
+  });
+}
+
+function showOccupied(tiles) {
+  tiles.querySelectorAll(".occupied-hidden").forEach((element) => {
+    element.classList.remove("occupied-hidden");
+    element.classList.add("occupied");
+  });
+}
