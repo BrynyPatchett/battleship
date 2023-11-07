@@ -90,6 +90,9 @@ body{
     background-color: rgb(168, 170, 162);
 }
 
+.occupied-hidden{
+    background-color: rgb(85, 83, 83);
+}
 
 .miss{
     background-color: lightblue;
@@ -154,4 +157,24 @@ body{
     padding: 10px;
     bottom: 10px;
     font-size: 2rem;
+}
+.turn-changer{
+    display: none;
+        flex-direction: column;
+        align-items: center;
+        height: min-content;
+        padding: 20px 100px;
+        padding-bottom: 20px;
+        margin-top: 10%;
+        background-color: white;
+        gap: 20px;
+        border-radius: 10px;
+        @media only screen and (max-width: 768px) {
+            width: 80%;
+            padding: 20px;
+         }
+    }
+
+#next-turn{
+    display: none;   
 }
