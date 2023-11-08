@@ -24,10 +24,6 @@ const turnButton = document.querySelector("#next-turn");
 
 const controlMessage = document.querySelector(".control-message");
 
-const nameinput = namesModal();
-
-
-
 
 turnButton.addEventListener('click',()=>{
  turnButton.style.display = "none";
@@ -51,7 +47,6 @@ let playerRightTiles = playerRightBoard.querySelector(".tiles");
 let selectedPvE = modalContent.querySelector("#PvE");
 let selectedPvP = modalContent.querySelector("#PvP");
 selectedPvE.addEventListener("click", initPvEGame);
-// selectedPvP.addEventListener("click", initPvPGame);
 selectedPvP.addEventListener("click", displayNameModal);
 
 function displayNameModal(){
@@ -155,9 +150,7 @@ function initaliseGame(tiles, gameBoard, isPvP) {
               currentPlayer = 1;
               initaliseGame(playerLeftTiles, gameboardLeft, 2);
             } else {
-              // showOccupied(playerRightTiles);
               console.log("startPvPgame(tiles)");
-              // currentPlayer = 0;
               startPvPgame();
             }
           } else {
@@ -231,31 +224,36 @@ function startPvPgame() {
   //add hover to tiles of first playerr
   removeHoverFromTiles(playerRightTiles);
    addHoverToTiles(playerLeftTiles);
+   inputDisabled = true;
   let playerOne = new Player(playerNames[0], gameboardLeft);
   let playerTwo = new Player(playerNames[1], gameboardRight);
   currentPlayer = 0;
    game = new Game(playerOne, playerTwo);
    enemyTiles = playerRightTiles;
-      currentTiles = playerLeftTiles;
+     currentTiles = playerLeftTiles;
    switchDisplay(enemyTiles, currentTiles);
     hideOccupied(playerLeftTiles);
+    
     
 
   [...playerLeftTiles.children].forEach((element) => {
     element.addEventListener("click", () => {
+      if(!inputDisabled){
       enemyTiles = playerLeftTiles;
       currentTiles = playerRightTiles;
       PvPTurn(element, 0, playerOne,playerRightTiles,playerLeftTiles);
+      }
 
     });
   });
 
   [...playerRightTiles.children].forEach((element) => {
     element.addEventListener("click", () => {
+      if(!inputDisabled){
       enemyTiles = playerRightTiles;
       currentTiles = playerLeftTiles;
       PvPTurn(element, 1, playerTwo,playerLeftTiles,playerRightTiles);
-
+    }
     });
   });
   
@@ -313,7 +311,7 @@ function startPvEgame(tiles) {
 
 function PvPTurn(element, playerId, player) {
 
-  if (currentPlayer === playerId && !inputDisabled) {
+  if (currentPlayer === playerId) {
     let coords = { x: +element.dataset.col, y: +element.dataset.row };
     let move = game.MakeMove(coords);
     if (move === 2) {
