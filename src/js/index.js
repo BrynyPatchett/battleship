@@ -79,6 +79,7 @@ function initPvEGame() {
 
   updateBoardName(playerRightBoard, "You");
   updateBoardName(playerLeftBoard, "Computer");
+  playerNames[0] = "";
   removeHoverFromTiles(playerLeftTiles);
   //list of ships, add click event, then remove after each one placed
   currentDirection = 0;
@@ -291,18 +292,22 @@ function startPvEgame(tiles) {
         return;
       }
       //make AI move
-      let pcMoveCoords = computer.GenerateRandomMove();
+      let pcMoveCoords = computer.MakeRandomMove();
       move = game.MakeMove(pcMoveCoords);
+
       let shotTile = playerRightTiles.querySelector(
         `[data-row="${pcMoveCoords.y}"][data-col="${pcMoveCoords.x}"]`
       );
+      console.log("moveresult :"  + move + " coords : x : " + pcMoveCoords.x + ", y : " + pcMoveCoords.y);
       if (move === 2) {
         shotTile.classList.add("hit");
         displayEndScreen(computer.playerName);
         return;
       } else if (move === 1) {
         shotTile.classList.add("hit");
+        console.log("ADDING HIT")
       } else if (move === 0) {
+        console.log("ADDING MISS")
         shotTile.classList.add("miss");
       }
     });
@@ -371,7 +376,6 @@ function resetGame() {
 }
 
 function rotateShip(e) {
-  console.log(e.code === "Space");
   if (currentDirection === 0) {
     currentDirection = 1;
   } else {

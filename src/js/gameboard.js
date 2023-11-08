@@ -90,7 +90,7 @@ export default class Gameboard {
 
   ReceiveAttack(coords){
     if(!this.validShotInput(coords.y,coords.x)){
-      throw new Error("Invalid Input");
+      return -1;
     }
     if(this.grid[coords.y][coords.x] === 0){
       this.grid[coords.y][coords.x] = -1;

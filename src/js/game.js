@@ -18,18 +18,16 @@ export default class Game {
       console.log(this.currentPlayer.gameBoard.AllSunk());
       if (this.currentPlayer.gameBoard.AllSunk() !== true) {
         this.switchPlayerTurn();
-        return moveResult;
+        return move;
       }
+      return 2;
       //game Over
-      moveResult = 2;
     } else if (move === 0) {
-      moveResult = 0;
       this.switchPlayerTurn();
     } else {
       console.log("Bad Move");
-      moveResult = -1;
     }
-    return moveResult;
+    return move;
   }
 
   switchPlayerTurn() {
