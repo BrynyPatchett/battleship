@@ -110,6 +110,7 @@ function addHoverToTiles(tiles) {
 }
 
 function initaliseGame(tiles, gameBoard, isPvP) {
+   currentTiles = tiles;
   document.addEventListener("keydown", rotateShip);
   controlMessage.style.display = "flex";
   controlMessage.textContent = playerNames[currentPlayer] + " Click to place ship. Press 'space' to rotate.";
@@ -133,8 +134,7 @@ function initaliseGame(tiles, gameBoard, isPvP) {
         selectedShipIndex++;
         if (selectedShipIndex === ships.length) {
           document.removeEventListener("keydown", rotateShip);
-          element.onclick = null;
-          element.onmouseover = null;
+     
           if (isPvP > 0) {
               removeHoverPlacementToBoard(tiles)
             //if PvP = 1, first player setup complete setup second player, else ,play PvP game
